@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../redux/store";
 import type { Task } from "../types/Task";
