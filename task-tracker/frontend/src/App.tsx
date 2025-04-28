@@ -1,13 +1,17 @@
-import TaskList from "./components/TaskList";
-import TaskForm from "./components/TaskForm";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ClientDashboard from "./components/ClientDashboard";
+import CreatePhase from "./components/CreatePhase";
+import LifecycleManager from "./components/LifecycleManager";
 
-const App = () => {
+const App: React.FC = () => {
 	return (
-		<div>
-			<h1>Task Tracker</h1>
-			<TaskForm />
-			<TaskList />
-		</div>
+		<Router>
+			<Routes>
+				<Route path="/clients/:id" element={<LifecycleManager />} />
+				<Route path="/clients" element={<ClientDashboard />} />
+				<Route path="/clients/new" element={<CreatePhase />} />
+			</Routes>
+		</Router>
 	);
 };
 
