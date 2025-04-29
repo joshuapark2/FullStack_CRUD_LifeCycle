@@ -1,10 +1,14 @@
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import type { RootState, AppDispatch } from "../redux/store";
-import { updateClientAPI } from "../redux/clientSlice";
 import { useState } from "react";
+import { updateClientAPI } from "../redux/clientSlice";
+import Spinner from "./Spinner";
+import type { RootState, AppDispatch } from "../redux/store";
+interface PhaseNavigationProps {
+	setDirection?: (dir: "forward" | "backward") => void;
+}
 
-const PhaseNavigation: React.FC = () => {
+const PhaseNavigation: React.FC<PhaseNavigationProps> = ({ setDirection }) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch<AppDispatch>();
 	const { id } = useParams();
@@ -20,15 +24,16 @@ const PhaseNavigation: React.FC = () => {
 			type="button"
 			onClick={() => navigate("/clients")}
 			disabled={isUpdating}
+			className="bg-gray-600 hover:bg-gray-700 disabled:opacity-50 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 flex items-center space-x-2"
 		>
-			⬅ Back to Dashboard
+			{isUpdating ? <Spinner size="w-4 h-4" /> : "⬅ Back to Dashboard"}
 		</button>
 	);
 
 	let phaseButton = null;
 
 	if (location.pathname === "/clients/new") {
-		return <div style={{ marginBottom: "20px" }}>{dashboardButton}</div>;
+		return <div className="flex space-x-4 mb-6">{dashboardButton}</div>;
 	}
 
 	const handleBack = async (newStatus: string) => {
@@ -56,8 +61,9 @@ const PhaseNavigation: React.FC = () => {
 						type="button"
 						disabled={isUpdating}
 						onClick={() => handleBack("Create")}
+						className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 flex items-center space-x-2"
 					>
-						⬅ Back to Create Phase
+						{isUpdating ? <Spinner size="w-4 h-4" /> : "⬅ Back to Create Phase"}
 					</button>
 				);
 				break;
@@ -67,8 +73,13 @@ const PhaseNavigation: React.FC = () => {
 						type="button"
 						disabled={isUpdating}
 						onClick={() => handleBack("Proposal")}
+						className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 flex items-center space-x-2"
 					>
-						⬅ Back to Proposal Phase
+						{isUpdating ? (
+							<Spinner size="w-4 h-4" />
+						) : (
+							"⬅ Back to Proposal Phase"
+						)}
 					</button>
 				);
 				break;
@@ -78,8 +89,13 @@ const PhaseNavigation: React.FC = () => {
 						type="button"
 						disabled={isUpdating}
 						onClick={() => handleBack("Pending Decision")}
+						className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 flex items-center space-x-2"
 					>
-						⬅ Back to Decision Phase
+						{isUpdating ? (
+							<Spinner size="w-4 h-4" />
+						) : (
+							"⬅ Back to Decision Phase"
+						)}
 					</button>
 				);
 				break;
@@ -87,10 +103,8 @@ const PhaseNavigation: React.FC = () => {
 	}
 
 	return (
-		<div style={{ marginBottom: "20px" }}>
-			{phaseButton && (
-				<span style={{ marginRight: "10px" }}>{phaseButton}</span>
-			)}
+		<div className="flex flex-wrap space-x-4 mb-6">
+			{phaseButton && phaseButton}
 			{dashboardButton}
 		</div>
 	);
