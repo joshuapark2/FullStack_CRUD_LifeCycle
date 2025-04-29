@@ -12,7 +12,7 @@ class WebConfig {
         return object : WebMvcConfigurer {
             override fun addCorsMappings(registry: CorsRegistry) {
                 registry.addMapping("/**")
-                    .allowedOrigins("http://localhost:5174")  // Make sure this matches your frontend port
+                    .allowedOrigins("http://localhost:5174")
                     .allowedMethods("*")
             }
         }
