@@ -1,20 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import type { RootState } from "../redux/store";
-import { updateCurrentClient } from "../redux/clientSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { updateClientAPI } from "../redux/clientSlice";
+import type { RootState, AppDispatch } from "../redux/store";
 import PhaseNavigation from "./PhaseNavigation";
 
 const ProposalPhase: React.FC = () => {
 	const navigate = useNavigate();
-	const dispatch = useDispatch();
+	const dispatch = useDispatch<AppDispatch>();
 
 	const client = useSelector((state: RootState) => state.client.currentClient);
 
-	const [selectedServices, setSelectedServices] = useState<string[]>(
-		client?.servicesRequested || [],
-	);
+	const [selectedServices, setSelectedServices] = useState<string[]>([]);
 	const [sendPreview, setSendPreview] = useState(false);
+
+	// 🧠 On mount: hydrate local state from Redux (only once)
+	useEffect(() => {
+		if (client?.servicesProposed?.length) {
+			setSelectedServices(client.servicesProposed);
+		} else if (client?.servicesRequested?.length) {
+			setSelectedServices(client.servicesRequested);
+		}
+
+		if (client?.sendPreview) {
+			setSendPreview(client.sendPreview);
+		}
+	}, [client]);
 
 	const handleServiceChange = (service: string) => {
 		setSelectedServices((prev) =>
@@ -24,24 +35,36 @@ const ProposalPhase: React.FC = () => {
 		);
 	};
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 
-		if (selectedServices.length === 0) {
+		if (!client || client.id === undefined) {
+			alert("Client data is missing. Please restart the onboarding.");
+			return;
+		}
+
+		if (!selectedServices.length) {
 			alert("Please select at least one banking service to propose.");
 			return;
 		}
 
-		dispatch(
-			updateCurrentClient({
-				servicesProposed: selectedServices,
-				sendPreview,
-				status: "Pending Decision",
-			}),
-		);
+		try {
+			await dispatch(
+				updateClientAPI({
+					id: client.id,
+					updates: {
+						servicesProposed: selectedServices,
+						sendPreview,
+						status: "Pending Decision",
+					},
+				}),
+			).unwrap();
 
-		// Navigate AFTER ensuring state is updated
-		navigate(`/clients/${client?.id}`);
+			navigate(`/clients/${client.id}`);
+		} catch (error) {
+			console.error("Failed to update client during proposal phase:", error);
+			alert("Something went wrong while updating client.");
+		}
 	};
 
 	if (!client)
@@ -50,7 +73,6 @@ const ProposalPhase: React.FC = () => {
 	return (
 		<div>
 			<PhaseNavigation />
-
 			<h2>Proposal Phase - Draft Banking Solutions</h2>
 			<p>
 				<strong>Client:</strong> {client.fullName} ({client.clientType})

@@ -1,30 +1,52 @@
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import type { RootState } from "../redux/store";
-import { updateCurrentClient } from "../redux/clientSlice";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "../redux/store";
+import { updateClientAPI } from "../redux/clientSlice";
+import { useState } from "react";
 
 const PhaseNavigation: React.FC = () => {
 	const navigate = useNavigate();
-	const dispatch = useDispatch();
+	const dispatch = useDispatch<AppDispatch>();
 	const { id } = useParams();
 	const location = useLocation();
+
+	const [isUpdating, setIsUpdating] = useState(false);
 
 	const clients = useSelector((state: RootState) => state.client.clients);
 	const client = clients.find((c) => c.id === Number(id));
 
-	// Always show Back to Dashboard button
 	const dashboardButton = (
-		<button type="button" onClick={() => navigate("/clients")}>
+		<button
+			type="button"
+			onClick={() => navigate("/clients")}
+			disabled={isUpdating}
+		>
 			⬅ Back to Dashboard
 		</button>
 	);
 
 	let phaseButton = null;
 
-	// If we're in the Create Phase (by URL)
 	if (location.pathname === "/clients/new") {
 		return <div style={{ marginBottom: "20px" }}>{dashboardButton}</div>;
 	}
+
+	const handleBack = async (newStatus: string) => {
+		if (!client) return;
+		setIsUpdating(true);
+
+		try {
+			await dispatch(
+				updateClientAPI({ id: client.id, updates: { status: newStatus } }),
+			).unwrap();
+			navigate(`/clients/${client.id}`);
+		} catch (error) {
+			console.error("Failed to go back phase:", error);
+			alert("Something went wrong while navigating back. Please try again.");
+		} finally {
+			setIsUpdating(false);
+		}
+	};
 
 	if (client) {
 		switch (client.status) {
@@ -32,38 +54,30 @@ const PhaseNavigation: React.FC = () => {
 				phaseButton = (
 					<button
 						type="button"
-						onClick={() => {
-							dispatch(updateCurrentClient({ status: "Create" }));
-							navigate(`/clients/${client.id}`);
-						}}
+						disabled={isUpdating}
+						onClick={() => handleBack("Create")}
 					>
 						⬅ Back to Create Phase
 					</button>
 				);
 				break;
-
 			case "Pending Decision":
 				phaseButton = (
 					<button
 						type="button"
-						onClick={() => {
-							dispatch(updateCurrentClient({ status: "Proposal" }));
-							navigate(`/clients/${client.id}`);
-						}}
+						disabled={isUpdating}
+						onClick={() => handleBack("Proposal")}
 					>
 						⬅ Back to Proposal Phase
 					</button>
 				);
 				break;
-
 			case "Finalization":
 				phaseButton = (
 					<button
 						type="button"
-						onClick={() => {
-							dispatch(updateCurrentClient({ status: "Pending Decision" }));
-							navigate(`/clients/${client.id}`);
-						}}
+						disabled={isUpdating}
+						onClick={() => handleBack("Pending Decision")}
 					>
 						⬅ Back to Decision Phase
 					</button>

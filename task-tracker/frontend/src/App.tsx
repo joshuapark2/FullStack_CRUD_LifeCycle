@@ -7,8 +7,9 @@ const App: React.FC = () => {
 	return (
 		<Router>
 			<Routes>
-				<Route path="/clients/:id" element={<LifecycleManager />} />
+				<Route path="/" element={<ClientDashboard />} />
 				<Route path="/clients" element={<ClientDashboard />} />
+				<Route path="/clients/:id" element={<LifecycleManager />} />
 				<Route path="/clients/new" element={<CreatePhase />} />
 			</Routes>
 		</Router>

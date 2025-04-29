@@ -1,14 +1,17 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { createClient, updateCurrentClient } from "../redux/clientSlice";
-import type { RootState } from "../redux/store";
+import {
+	createClientAPI,
+	updateClientAPI,
+	setCurrentClient,
+} from "../redux/clientSlice";
 import PhaseNavigation from "./PhaseNavigation";
+import type { AppDispatch, RootState } from "../redux/store";
 
 const CreatePhase: React.FC = () => {
 	const navigate = useNavigate();
-	const dispatch = useDispatch();
-
+	const dispatch = useDispatch<AppDispatch>();
 	const currentClient = useSelector(
 		(state: RootState) => state.client.currentClient,
 	);
@@ -22,8 +25,12 @@ const CreatePhase: React.FC = () => {
 	);
 
 	useEffect(() => {
-		if (currentClient && currentClient.status !== "Create") {
-			dispatch(updateCurrentClient({ status: "Create" }));
+		if (
+			currentClient &&
+			currentClient.status !== "Create" &&
+			currentClient.id !== undefined
+		) {
+			dispatch(setCurrentClient({ ...currentClient, status: "Create" }));
 		}
 	}, [currentClient, dispatch]);
 
@@ -35,35 +42,43 @@ const CreatePhase: React.FC = () => {
 		);
 	};
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 
+		if (!fullName.includes(" ")) {
+			alert("Please enter both first and last name.");
+			return;
+		}
 		if (services.length === 0) {
 			alert("Please select at least one requested service.");
 			return;
 		}
 
-		if (!fullName.includes(" ")) {
-			alert("Please enter a full name (first and last).");
-			return;
-		}
-
-		const newClient = {
-			id: currentClient?.id ?? Date.now(),
+		const payload = {
 			fullName,
 			clientType,
 			servicesRequested: services,
 			status: "Proposal",
-			date: currentClient?.date ?? new Date().toISOString().split("T")[0],
+			date: new Date().toISOString().split("T")[0],
+			sendPreview: false,
 		};
 
-		if (currentClient) {
-			dispatch(updateCurrentClient(newClient));
-		} else {
-			dispatch(createClient(newClient));
-		}
+		try {
+			let client;
+			if (currentClient?.id) {
+				client = await dispatch(
+					updateClientAPI({ id: currentClient.id, updates: payload }),
+				).unwrap();
+			} else {
+				client = await dispatch(
+					createClientAPI({ ...payload, id: 0 }),
+				).unwrap();
+			}
 
-		navigate(`/clients/${newClient.id}`);
+			navigate(`/clients/${client.id}`);
+		} catch (error) {
+			console.error("Failed to proceed to proposal phase:", error);
+		}
 	};
 
 	return (
@@ -83,26 +98,18 @@ const CreatePhase: React.FC = () => {
 
 				<fieldset>
 					<legend>Client Type:</legend>
-					<label>
-						<input
-							type="radio"
-							name="clientType"
-							value="Personal"
-							checked={clientType === "Personal"}
-							onChange={(e) => setClientType(e.target.value)}
-						/>
-						Personal
-					</label>
-					<label>
-						<input
-							type="radio"
-							name="clientType"
-							value="Business"
-							checked={clientType === "Business"}
-							onChange={(e) => setClientType(e.target.value)}
-						/>
-						Business
-					</label>
+					{["Personal", "Business"].map((type) => (
+						<label key={type}>
+							<input
+								type="radio"
+								name="clientType"
+								value={type}
+								checked={clientType === type}
+								onChange={(e) => setClientType(e.target.value)}
+							/>
+							{type}
+						</label>
+					))}
 				</fieldset>
 
 				<fieldset>

@@ -1,18 +1,38 @@
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { updateClientAPI, clearCurrentClient } from "../redux/clientSlice";
 import type { RootState } from "../redux/store";
-import { updateCurrentClient, clearCurrentClient } from "../redux/clientSlice";
 import PhaseNavigation from "./PhaseNavigation";
+import type { AppDispatch } from "../redux/store";
+
 const ClosedPhase: React.FC = () => {
 	const navigate = useNavigate();
-	const dispatch = useDispatch();
+	const dispatch = useDispatch<AppDispatch>();
 
 	const client = useSelector((state: RootState) => state.client.currentClient);
 
-	const handleComplete = () => {
-		dispatch(updateCurrentClient({ status: "Closed and Onboarded" }));
-		dispatch(clearCurrentClient()); // Optional: reset current client state
-		navigate("/clients");
+	const handleComplete = async () => {
+		if (!client) {
+			alert("No client loaded. Please restart onboarding.");
+			return;
+		}
+
+		try {
+			await dispatch(
+				updateClientAPI({
+					id: client.id,
+					updates: {
+						status: "Closed and Onboarded",
+					},
+				}),
+			).unwrap();
+
+			alert("Onboarding completed successfully!");
+			dispatch(clearCurrentClient());
+			navigate("/clients");
+		} catch (error) {
+			console.error("Failed to finalize onboarding:", error);
+		}
 	};
 
 	if (!client)

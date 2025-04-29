@@ -1,32 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import type { RootState } from "../redux/store";
-import { updateCurrentClient } from "../redux/clientSlice";
+import { updateClientAPI } from "../redux/clientSlice";
+import type { RootState, AppDispatch } from "../redux/store";
 import PhaseNavigation from "./PhaseNavigation";
+
 const DecisionPhase: React.FC = () => {
 	const navigate = useNavigate();
-	const dispatch = useDispatch();
+	const dispatch = useDispatch<AppDispatch>();
 
 	const client = useSelector((state: RootState) => state.client.currentClient);
-	const [selectedTier, setSelectedTier] = useState(client?.selectedTier || "");
+	const [selectedTier, setSelectedTier] = useState("");
 
-	const handleSubmit = (e: React.FormEvent) => {
+	useEffect(() => {
+		if (client?.selectedTier) {
+			setSelectedTier(client.selectedTier);
+		}
+	}, [client]);
+
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+
+		if (!client || client.id === undefined) {
+			alert("No client loaded. Please restart onboarding.");
+			return;
+		}
 
 		if (!selectedTier) {
 			alert("Please select a membership tier before proceeding.");
 			return;
 		}
 
-		dispatch(
-			updateCurrentClient({
-				selectedTier,
-				status: "Finalization",
-			}),
-		);
+		try {
+			await dispatch(
+				updateClientAPI({
+					id: client.id,
+					updates: {
+						selectedTier,
+						status: "Finalization",
+					},
+				}),
+			).unwrap();
 
-		navigate(`/clients/${client?.id}`);
+			navigate(`/clients/${client.id}`);
+		} catch (error) {
+			console.error("Failed to update client during decision phase:", error);
+			alert("An error occurred while finalizing the membership.");
+		}
 	};
 
 	if (!client)
