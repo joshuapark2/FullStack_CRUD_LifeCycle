@@ -1,6 +1,6 @@
 # 🧑‍💻 Joshua Park — Forward Deployed Software Engineer Demo
 
-Welcome! This is a full-stack demo application submitted for the **Associate Software Engineer, UX Engineering** role.
+Welcome! This is a full-stack demo application submitted for the **Forward Deployed Software Engineer** role.
 This application is a MERN Stack app with the purpose of guiding banking employees through the lifecycle of onboarding a client.
 
 
