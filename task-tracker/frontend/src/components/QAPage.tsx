@@ -3,21 +3,21 @@ import { useState } from "react";
 const faqItems = [
 	{
 		id: "faq-1",
-		question: "How does the client onboarding process work?",
+		question: "Why did you build this app for Govini?",
 		answer:
-			"We guide financial institutions through a structured multi-phase lifecycle to onboard clients securely and efficiently",
+			"My goal is to turn business ideas into real, usable products—minimizing risk, building trust, and showcasing solutions that reflect both technical expertise and meaningful impact. This app was a way to demonstrate that vision in action for Pegasystems.",
 	},
 	{
 		id: "faq-2",
-		question: "Can I customize the client journey?",
+		question: "What business problem did this application solve?",
 		answer:
-			"Yes! TaskTracker allows full customization of each phase to match your specific institutional needs.",
+			"One of the biggest challenges in enterprise software is guiding complex business processes through an end-to-end lifecycle of Create → Proposal → Decision → Closed. This app solves that by streamlining how interfaces are authored and maintained, making case management easier and more intuitive.",
 	},
 	{
 		id: "faq-3",
-		question: "Is TaskTracker secure?",
+		question: "What technologies were used to build the application?",
 		answer:
-			"Absolutely. We prioritize data security and compliance at every stage of the onboarding lifecycle.",
+			"The frontend was built using JavaScript/TypeScript with React and Redux. The backend was developed using Java and Kotlin, powered by the Spring Boot framework.",
 	},
 ];
 

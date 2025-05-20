@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import logo from "../../assets/pegaCompanyLogo.png";
+import govini from "../../assets/Govini.jpg";
 
 const Header: React.FC = () => {
 	const location = useLocation();
@@ -18,10 +18,8 @@ const Header: React.FC = () => {
 					to="/clients"
 					className="flex items-center space-x-3 hover:opacity-80 transition"
 				>
-					<img src={logo} alt="Company Logo" className="w-10 h-10" />
-					<span className="font-bold text-xl text-gray-800">
-						TaskTracker Co.
-					</span>
+					<img src={govini} alt="Company Logo" className="w-20 h-10" />
+					{/* <span className="font-bold text-xl text-gray-800">Govini</span> */}
 				</Link>
 
 				{/* Navigation Links */}
